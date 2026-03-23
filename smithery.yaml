@@ -1,0 +1,43 @@
+name: cortivex
+description: AI agent pipeline orchestration with 17 MCP tools — run, coordinate, and optimize multi-agent workflows
+version: 1.0.0
+license: MIT
+author: Ahmed Raoofuddin
+repository: https://github.com/AhmedRaoofuddin/Cortivex
+startCommand:
+  type: stdio
+  command: npx
+  args:
+    - "-y"
+    - cortivex
+    - serve
+    - "--mcp"
+  configSchema:
+    type: object
+    properties: {}
+tools:
+  - cortivex_run
+  - cortivex_create
+  - cortivex_status
+  - cortivex_list
+  - cortivex_stop
+  - cortivex_mesh
+  - cortivex_insights
+  - cortivex_history
+  - cortivex_export
+  - cortivex_knowledge
+  - cortivex_decompose
+  - cortivex_nodes
+  - cortivex_templates
+  - cortivex_config
+  - cortivex_tasks
+  - cortivex_scale
+  - cortivex_agent
+keywords:
+  - ai-agents
+  - pipeline-orchestration
+  - multi-agent
+  - claude-code
+  - code-review
+  - security-audit
+  - testing

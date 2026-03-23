@@ -435,7 +435,27 @@ Six orchestration node types (SwarmCoordinator, AgentMonitor, ConsensusManager, 
 
 ## MCP Server
 
-The Cortivex MCP server exposes tools for programmatic access from Claude Code or any MCP client.
+The Cortivex MCP server exposes 17 tools for programmatic access from any MCP-compatible AI tool.
+
+```bash
+# Quick setup — generates the config for your tool
+cortivex setup-mcp --tool cursor
+```
+
+### Supported Tools
+
+| Tool | Status | Setup |
+|------|--------|-------|
+| Claude Desktop | Supported | `cortivex setup-mcp --tool claude-desktop` |
+| Cursor | Supported | `cortivex setup-mcp --tool cursor` |
+| Windsurf | Supported | `cortivex setup-mcp --tool windsurf` |
+| Cline | Supported | `cortivex setup-mcp --tool cline` |
+| VS Code (Copilot) | Supported | `cortivex setup-mcp --tool vscode` |
+| Continue.dev | Supported | `cortivex setup-mcp --tool continue` |
+| Zed | Supported | `cortivex setup-mcp --tool zed` |
+| JetBrains / Amazon Q | Supported | `cortivex setup-mcp --tool jetbrains` |
+
+> Full setup guide with copy-paste configs: [docs/mcp-integrations.md](docs/mcp-integrations.md)
 
 <details>
 <summary><strong>View all 17 MCP tools</strong></summary>
@@ -493,6 +513,7 @@ The visual dashboard is available at `localhost:4200` after running `cortivex ui
 | `cortivex status [runId]` | Show the status of a pipeline run (defaults to most recent) |
 | `cortivex stop <runId>` | Send a stop signal to a running pipeline |
 | `cortivex install-skills` | Install Cortivex skills into the current project |
+| `cortivex setup-mcp` | Generate MCP config for your AI tool (Cursor, VS Code, etc.) |
 
 ### Integrations
 

@@ -286,12 +286,30 @@ program
     const port = options.port ? parseInt(options.port, 10) : 3939;
 
     if (options.mcp) {
-      console.log(
-        chalk.cyan('  Starting Cortivex MCP server on stdio...')
-      );
-      // MCP server would read from stdin, write to stdout
-      // Placeholder — the full MCP implementation would go here
-      console.log(chalk.gray('  MCP server mode — awaiting requests'));
+      // Start the actual MCP server over stdio
+      const { fileURLToPath } = await import('node:url');
+      const { dirname, join: pathJoin } = await import('node:path');
+      const { spawn: spawnMcp } = await import('node:child_process');
+
+      const __filename = fileURLToPath(import.meta.url);
+      const mcpServerPath = pathJoin(dirname(__filename), '..', '..', '..', 'mcp-server', 'dist', 'index.js');
+
+      const child = spawnMcp('node', [mcpServerPath], {
+        stdio: ['inherit', 'inherit', 'inherit'],
+        env: { ...process.env },
+      });
+
+      child.on('error', (err) => {
+        console.error(chalk.red(`  Failed to start MCP server: ${err.message}`));
+        process.exit(1);
+      });
+
+      child.on('close', (code) => {
+        process.exit(code ?? 0);
+      });
+
+      // Keep parent alive until child exits
+      await new Promise(() => {});
     } else {
       console.log('');
       console.log(
@@ -853,6 +871,147 @@ program
         )
       );
       process.exit(1);
+    }
+  });
+
+// --- setup-mcp ---
+program
+  .command('setup-mcp')
+  .description('Generate MCP server config for your AI tool')
+  .option('-t, --tool <tool>', 'Target tool (claude-desktop, cursor, windsurf, cline, vscode, continue, zed, jetbrains)')
+  .action(async (options: { tool?: string }) => {
+    const configs: Record<string, { name: string; config: string; path: string }> = {
+      'claude-desktop': {
+        name: 'Claude Desktop',
+        path: 'Windows: %APPDATA%\\Claude\\claude_desktop_config.json\nmacOS: ~/Library/Application Support/Claude/claude_desktop_config.json',
+        config: JSON.stringify({
+          mcpServers: {
+            cortivex: {
+              command: 'npx',
+              args: ['-y', 'cortivex', 'serve', '--mcp'],
+            },
+          },
+        }, null, 2),
+      },
+      'cursor': {
+        name: 'Cursor',
+        path: 'Settings > Features > MCP Servers > Add Server\nOr: .cursor/mcp.json',
+        config: JSON.stringify({
+          mcpServers: {
+            cortivex: {
+              command: 'npx',
+              args: ['-y', 'cortivex', 'serve', '--mcp'],
+            },
+          },
+        }, null, 2),
+      },
+      'windsurf': {
+        name: 'Windsurf',
+        path: 'Settings > MCP Servers > Add Custom Server',
+        config: JSON.stringify({
+          mcpServers: {
+            cortivex: {
+              command: 'npx',
+              args: ['-y', 'cortivex', 'serve', '--mcp'],
+              env: {},
+            },
+          },
+        }, null, 2),
+      },
+      'cline': {
+        name: 'Cline',
+        path: 'Cline > MCP Servers > Configure > Advanced MCP Settings',
+        config: JSON.stringify({
+          mcpServers: {
+            cortivex: {
+              command: 'npx',
+              args: ['-y', 'cortivex', 'serve', '--mcp'],
+              disabled: false,
+            },
+          },
+        }, null, 2),
+      },
+      'vscode': {
+        name: 'VS Code (GitHub Copilot)',
+        path: '.vscode/mcp.json (workspace) or User Settings',
+        config: JSON.stringify({
+          servers: {
+            cortivex: {
+              type: 'stdio',
+              command: 'npx',
+              args: ['-y', 'cortivex', 'serve', '--mcp'],
+            },
+          },
+        }, null, 2),
+      },
+      'continue': {
+        name: 'Continue.dev',
+        path: '.continue/config.yaml or .continue/mcpServers/cortivex.yaml',
+        config: `mcpServers:\n  - name: cortivex\n    command: npx\n    args:\n      - "-y"\n      - cortivex\n      - serve\n      - "--mcp"`,
+      },
+      'zed': {
+        name: 'Zed',
+        path: 'Zed > Settings > Open Settings (settings.json)',
+        config: JSON.stringify({
+          context_servers: {
+            cortivex: {
+              command: {
+                path: 'npx',
+                args: ['-y', 'cortivex', 'serve', '--mcp'],
+              },
+              settings: {},
+            },
+          },
+        }, null, 2),
+      },
+      'jetbrains': {
+        name: 'JetBrains / Amazon Q Developer',
+        path: '.amazonq/default.json (project) or ~/.aws/amazonq/default.json (global)',
+        config: JSON.stringify({
+          mcpServers: {
+            cortivex: {
+              command: 'npx',
+              args: ['-y', 'cortivex', 'serve', '--mcp'],
+            },
+          },
+        }, null, 2),
+      },
+    };
+
+    console.log('');
+
+    if (options.tool) {
+      const key = options.tool.toLowerCase();
+      const entry = configs[key];
+      if (!entry) {
+        console.log(chalk.red(`  Unknown tool: "${options.tool}"`));
+        console.log(chalk.gray(`  Available: ${Object.keys(configs).join(', ')}`));
+        console.log('');
+        process.exit(1);
+      }
+
+      console.log(chalk.bold.cyan(`  ${entry.name} MCP Configuration`));
+      console.log(chalk.gray('  ' + '\u2500'.repeat(50)));
+      console.log(chalk.gray(`  Config location: ${entry.path}`));
+      console.log('');
+      console.log(entry.config);
+      console.log('');
+    } else {
+      console.log(chalk.bold.cyan('  Cortivex MCP Server Setup'));
+      console.log(chalk.gray('  ' + '\u2500'.repeat(50)));
+      console.log('');
+      console.log(chalk.white('  Supported tools:'));
+      console.log('');
+
+      for (const [key, entry] of Object.entries(configs)) {
+        console.log(`  ${chalk.green('\u25cf')} ${chalk.bold(entry.name)} ${chalk.gray(`(--tool ${key})`)}`);
+      }
+
+      console.log('');
+      console.log(chalk.gray('  Usage: cortivex setup-mcp --tool <name>'));
+      console.log(chalk.gray('  Example: cortivex setup-mcp --tool cursor'));
+      console.log(chalk.gray('  Docs: docs/mcp-integrations.md'));
+      console.log('');
     }
   });
 
