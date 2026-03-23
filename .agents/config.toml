@@ -89,6 +89,26 @@ enabled = true
 path = ".agents/skills/cortivex-knowledge"
 enabled = true
 
+[[skills.config]]
+path = ".agents/skills/cortivex-pipeline-debugger"
+enabled = true
+
+[[skills.config]]
+path = ".agents/skills/cortivex-context-compression"
+enabled = true
+
+[[skills.config]]
+path = ".agents/skills/cortivex-drift-detection"
+enabled = true
+
+[[skills.config]]
+path = ".agents/skills/cortivex-agent-replay"
+enabled = true
+
+[[skills.config]]
+path = ".agents/skills/cortivex-cross-repo"
+enabled = true
+
 # =============================================================================
 # Profiles
 # =============================================================================

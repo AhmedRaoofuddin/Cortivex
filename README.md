@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/node-%3E%3D20-339933" alt="Node" />
   <img src="https://img.shields.io/badge/skills-15%20Claude%20Code-7B6EF6" alt="Skills" />
   <img src="https://img.shields.io/badge/agents-20%2B%20types-4F8EF7" alt="Agents" />
-  <img src="https://img.shields.io/badge/templates-15%20pipelines-E8A44A" alt="Templates" />
+  <img src="https://img.shields.io/badge/templates-16%20pipelines-E8A44A" alt="Templates" />
 </p>
 
 <p align="center">
@@ -280,10 +280,10 @@ These five skills address unsolved problems in multi-agent systems that no other
 
 ## Templates
 
-15 pipeline templates ship with Cortivex. Each is a tested, ready-to-run YAML configuration. Run any template with `cortivex run <name>`.
+16 pipeline templates ship with Cortivex. Each is a tested, ready-to-run YAML configuration. Run any template with `cortivex run <name>`.
 
 <details>
-<summary><strong>View all 15 templates</strong></summary>
+<summary><strong>View all 16 templates</strong></summary>
 
 | Template | What It Does | Nodes | Cost | Time |
 |----------|-------------|-------|------|------|
@@ -302,6 +302,7 @@ These five skills address unsolved problems in multi-agent systems that no other
 | `dependency-update` | Update packages, run tests, create PR | 3 | $0.03 | ~3m |
 | `changelog-release` | Generate changelog, update docs, create release PR | 3 | $0.03 | ~2m |
 | `pre-release-check` | Security scan, full tests, performance check, changelog | 4 | $0.06 | ~6m |
+| `dev-team` | Architect designs, Developer builds, Tester validates, Reviewer approves | 4 | $2.50+ | ~12m |
 
 </details>
 
@@ -502,10 +503,13 @@ cortivex/
     mcp-server/       MCP server for Claude Code
     http-server/      Express REST API + WebSocket
     dashboard/        Visual pipeline editor and monitoring UI
-    shared/           Shared types and utilities
   .agents/
+    config.toml       Agent configuration (models, mesh, learning, security)
     skills/           15 Claude Code skills (each in its own SKILL.md)
-  templates/          15 pipeline YAML templates
+  n8n-nodes/          n8n community nodes for pipeline automation
+  templates/          16 pipeline YAML templates
+  hooks/              Claude Code hooks configuration
+  docs/               Getting started, API reference, skill reference
   scripts/            Installation and utility scripts
 ```
 
