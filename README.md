@@ -36,7 +36,7 @@ Most Claude Code skills tell agents what to do. Cortivex teaches agents how to t
 
 Every skill in this library is a 450-1,200 line operational manual. Not a thin wrapper. Not a checklist. Each one includes reasoning protocols that force step-by-step thinking before action, anti-pattern tables with WRONG/RIGHT code examples showing exactly what fails and why, grounding rules for when the situation is uncertain, and Advanced Capabilities sections with production-grade MCP tool examples, YAML configurations, and JSON schemas. The result is measurably better agent output.
 
-Underneath, 15 production-grade skills power a complete multi-agent orchestration system: DAG-based pipelines that decompose complex tasks into parallel agent workflows, a filesystem-based mesh protocol that prevents agents from overwriting each other's work, Raft consensus for distributed leader election, CRDT knowledge graphs that prevent duplicate analysis across agents, and a self-learning engine that records execution metrics and applies confidence-scored optimizations automatically.
+Underneath, 15 production-grade skills power a complete multi-agent orchestration system: DAG-based pipelines that decompose complex tasks into parallel agent workflows, a filesystem-based mesh protocol that prevents agents from overwriting each other's work, leader election with quorum-based voting, shared knowledge graphs with content-hash deduplication that prevent duplicate analysis across agents, and a self-learning engine that records execution metrics and applies confidence-scored optimizations automatically.
 
 > **New to Cortivex?** You don't need to learn 15 skills or memorize CLI commands. After running `cortivex install-skills`, just use Claude Code normally. Ask it to "review my PR" and the pipeline skill activates automatically, selects the right template, builds the agent DAG, and executes it. The skills work in the background. You interact with natural language, Cortivex handles the orchestration.
 
@@ -97,8 +97,8 @@ Cortivex is a comprehensive AI agent orchestration system that transforms Claude
 > | **Agent Collaboration** | Agents work in isolation, no shared context | Agents coordinate via mesh protocol with shared knowledge graphs |
 > | **Coordination** | Manual orchestration between tasks | DAG-based pipelines with automatic parallel execution |
 > | **File Conflicts** | Agents overwrite each other's work | Mesh protocol with claim/release, deadlock detection, 5 resolution strategies |
-> | **Consensus** | No multi-agent decisions | Raft leader election with quorum, terms, automatic failover |
-> | **Knowledge Sharing** | Each agent starts from scratch | CRDT knowledge graphs with deduplication and cross-agent synthesis |
+> | **Consensus** | No multi-agent decisions | Leader election with quorum-based voting, terms, and automatic failover |
+> | **Knowledge Sharing** | Each agent starts from scratch | Shared knowledge graphs with content-hash deduplication and cross-agent synthesis |
 > | **Learning** | Static behavior, no adaptation | Confidence-scored insights with automatic optimization (34% faster after 50 runs) |
 > | **Complex Tasks** | Manual breakdown required | Automatic decomposition with dependency ordering and cost estimation |
 > | **Debugging** | No pipeline visibility | Step-through debugging with breakpoints, replay, and execution traces |
@@ -127,8 +127,8 @@ User → Cortivex (CLI/MCP) → Task Decomposer → Pipeline Engine → Agents �
 | **Planning** | Task Decomposer | Breaks requests into atomic tasks with dependencies and priorities |
 | **Execution** | Pipeline Engine | Runs agent DAGs with parallel execution and retry policies |
 | **Coordination** | Mesh Protocol | File ownership, conflict resolution, deadlock detection |
-| **Intelligence** | Knowledge Graph | CRDT-based shared findings across agents, deduplication |
-| **Consensus** | Raft Leader Election | Single coordinator in multi-node clusters, automatic failover |
+| **Intelligence** | Knowledge Graph | Shared knowledge graphs across agents with deduplication |
+| **Consensus** | Leader Election | Single coordinator in multi-node clusters, automatic failover |
 | **Debugging** | Pipeline Debugger | Breakpoints, step-through, replay, execution traces |
 | **Optimization** | Context Compressor | Preserves actionable information across agent handoffs |
 | **Monitoring** | Drift Detector | Tracks architecture, config, coverage, and doc drift |
@@ -157,13 +157,13 @@ When multiple agents work on the same repository, they need to coordinate file a
 
 This protocol is injected into every spawned agent's system prompt. Agents that violate it (skipping the check, forgetting to release) are caught by the MeshResolver, which runs continuous deadlock detection and supports five conflict resolution strategies.
 
-### Raft Consensus for Multi-Node Clusters
+### Leader Election for Multi-Node Clusters
 
-For distributed deployments across multiple machines, Cortivex implements Raft-style leader election. Exactly one node coordinates task scheduling at any time. If the leader fails, remaining nodes detect the missed heartbeats and elect a new leader within seconds. This prevents split-brain scenarios where two coordinators assign conflicting work.
+For distributed deployments across multiple machines, Cortivex implements quorum-based leader election. Exactly one node coordinates task scheduling at any time. If the leader fails, remaining nodes detect the missed heartbeats and elect a new leader within seconds. This prevents split-brain scenarios where two coordinators assign conflicting work.
 
-### CRDT Knowledge Graphs
+### Shared Knowledge Graphs
 
-When multiple analysis agents scan the same codebase, they independently discover the same findings. The KnowledgeCurator node maintains a shared knowledge graph using Conflict-free Replicated Data Types. Any agent can add knowledge at any time without locks. The CRDT guarantees all agents converge to the same view. Duplicate findings are automatically merged, and downstream agents skip files that have already been analyzed.
+When multiple analysis agents scan the same codebase, they independently discover the same findings. The KnowledgeCurator node maintains a shared knowledge graph with content-hash deduplication. Any agent can add knowledge at any time. Duplicate findings are automatically merged, and downstream agents skip files that have already been analyzed.
 
 ---
 
@@ -232,11 +232,11 @@ These five skills handle the distributed systems layer: file coordination, confl
     </tr>
     <tr>
       <td><strong>cortivex-consensus</strong></td>
-      <td>Raft-style leader election for multi-node clusters. Manages terms, quorum, heartbeats, and automatic failover when the leader goes down. Covers split-brain prevention and includes configurations for 3, 5, and 7-node clusters. Advanced Capabilities: Byzantine fault tolerance, consensus protocol selection, dynamic quorum management, split-brain detection and recovery, and leader election optimization. 467 lines.</td>
+      <td>Quorum-based leader election for multi-node clusters. Manages terms, quorum, heartbeats, and automatic failover when the leader goes down. Covers split-brain prevention and includes configurations for 3, 5, and 7-node clusters. Advanced Capabilities: Byzantine fault tolerance, consensus protocol selection, dynamic quorum management, split-brain detection and recovery, and leader election optimization. 467 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-knowledge</strong></td>
-      <td>Shared CRDT knowledge graphs across agents with five node types and seven edge types. Prevents duplicate work through content-hash deduplication and cross-agent synthesis via KnowledgeCurator nodes. Advanced Capabilities: semantic graph queries, knowledge fusion and deduplication, temporal reasoning, cross-domain inference, and knowledge export and visualization. 589 lines.</td>
+      <td>Shared knowledge graphs across agents with five node types and seven edge types. Prevents duplicate work through content-hash deduplication and cross-agent synthesis via KnowledgeCurator nodes. Advanced Capabilities: semantic graph queries, knowledge fusion and deduplication, temporal reasoning, cross-domain inference, and knowledge export and visualization. 589 lines.</td>
     </tr>
   </tbody>
 </table>

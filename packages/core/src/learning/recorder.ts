@@ -219,6 +219,21 @@ export class HistoryRecorder {
     return pruned;
   }
 
+  /**
+   * Get all execution runs (alias for getHistory).
+   */
+  async getRuns(): Promise<ExecutionRecord[]> {
+    return this.getHistory();
+  }
+
+  /**
+   * Get a single execution record by its run ID.
+   */
+  async getRunById(runId: string): Promise<ExecutionRecord | null> {
+    const records = await this.getHistory();
+    return records.find((record) => record.id === runId) ?? null;
+  }
+
   private calculateDuration(
     startedAt?: string,
     completedAt?: string

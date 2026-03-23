@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { readFile, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import { EventEmitter } from 'eventemitter3';
 import type {
   PipelineDefinition,
@@ -167,6 +169,11 @@ export class PipelineExecutor extends EventEmitter<ExecutorEvents> {
               aborted = true;
             }
           }
+
+          // Check for external stop signal
+          if (!aborted && (await this.checkStopSignal(runId))) {
+            aborted = true;
+          }
         }
       }
 
@@ -190,6 +197,9 @@ export class PipelineExecutor extends EventEmitter<ExecutorEvents> {
 
       // Record history
       await this.recorder.record(run);
+
+      // Clean up stop signal file if it exists
+      await this.cleanupStopSignal(runId);
 
       if (run.status === 'completed') {
         this.emit('pipeline:complete', run);
@@ -471,6 +481,25 @@ export class PipelineExecutor extends EventEmitter<ExecutorEvents> {
       chunks.push(array.slice(i, i + size));
     }
     return chunks;
+  }
+
+  private async checkStopSignal(runId: string): Promise<boolean> {
+    try {
+      const signalPath = join(process.cwd(), '.cortivex', 'signals', `stop-${runId}.json`);
+      await readFile(signalPath, 'utf-8');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async cleanupStopSignal(runId: string): Promise<void> {
+    try {
+      const signalPath = join(process.cwd(), '.cortivex', 'signals', `stop-${runId}.json`);
+      await unlink(signalPath);
+    } catch {
+      // Signal file doesn't exist, nothing to clean up
+    }
   }
 
   private delay(ms: number): Promise<void> {

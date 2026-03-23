@@ -685,8 +685,8 @@ program
       }
 
       const run = runId
-        ? runs.find((r) => r.id === runId)
-        : runs[runs.length - 1];
+        ? runs.find((r) => r.id === runId || r.id.startsWith(runId))
+        : runs[0];
 
       if (!run) {
         console.log('');
@@ -697,12 +697,8 @@ program
         process.exit(1);
       }
 
-      const statusColor =
-        run.status === 'success'
-          ? chalk.green
-          : run.status === 'failed'
-            ? chalk.red
-            : chalk.yellow;
+      const statusStr = run.success ? 'success' : 'failed';
+      const statusColor = run.success ? chalk.green : chalk.red;
 
       console.log('');
       console.log(chalk.bold.cyan('  Pipeline Run Status'));
@@ -714,28 +710,24 @@ program
         `  Pipeline:     ${chalk.white(run.pipeline)}`
       );
       console.log(
-        `  Status:       ${statusColor(run.status)}`
+        `  Status:       ${statusColor(statusStr)}`
       );
       console.log(
-        `  Duration:     ${chalk.white(run.duration.toFixed(1) + 's')}`
+        `  Duration:     ${chalk.white(run.totalDuration.toFixed(1) + 's')}`
       );
       console.log(
-        `  Cost:         ${chalk.white('$' + run.cost.toFixed(3))}`
+        `  Cost:         ${chalk.white('$' + run.totalCost.toFixed(3))}`
       );
       console.log('');
 
-      if (run.nodeOutcomes && run.nodeOutcomes.length > 0) {
+      if (run.nodeResults && run.nodeResults.length > 0) {
         console.log(chalk.bold.cyan('  Node Outcomes'));
         console.log(chalk.gray('  ' + '\u2500'.repeat(50)));
-        for (const outcome of run.nodeOutcomes) {
-          const nodeStatusColor =
-            outcome.status === 'success'
-              ? chalk.green
-              : outcome.status === 'failed'
-                ? chalk.red
-                : chalk.yellow;
+        for (const result of run.nodeResults) {
+          const nodeStatusStr = result.success ? 'success' : 'failed';
+          const nodeStatusColor = result.success ? chalk.green : chalk.red;
           console.log(
-            `  ${nodeStatusColor('\u25cf')} ${chalk.white(outcome.nodeId)} ${chalk.gray('—')} ${nodeStatusColor(outcome.status)} ${chalk.gray('(' + outcome.duration.toFixed(1) + 's, $' + outcome.cost.toFixed(3) + ')')}`
+            `  ${nodeStatusColor('\u25cf')} ${chalk.white(result.nodeId)} ${chalk.gray('—')} ${nodeStatusColor(nodeStatusStr)} ${chalk.gray('(' + result.duration.toFixed(1) + 's, $' + result.cost.toFixed(3) + ')')}`
           );
         }
         console.log('');
@@ -756,6 +748,39 @@ program
   .description('Send a stop signal to a running pipeline')
   .action(async (runId: string) => {
     try {
+      const { writeFile, mkdir } = await import('node:fs/promises');
+      const { join } = await import('node:path');
+
+      const cwd = process.cwd();
+
+      // Verify the run exists in history
+      const recorder = new HistoryRecorder(cwd);
+      const run = await recorder.getRunById(runId);
+      if (!run) {
+        console.log('');
+        console.error(
+          chalk.red(`  Error: No run found with ID "${runId}".`)
+        );
+        console.log('');
+        process.exit(1);
+      }
+
+      // Create the signals directory if it doesn't exist
+      const signalsDir = join(cwd, '.cortivex', 'signals');
+      await mkdir(signalsDir, { recursive: true });
+
+      // Write the stop signal file
+      const signalFile = join(signalsDir, `stop-${runId}.json`);
+      await writeFile(
+        signalFile,
+        JSON.stringify(
+          { runId, signal: 'stop', timestamp: new Date().toISOString() },
+          null,
+          2
+        ),
+        'utf-8'
+      );
+
       console.log('');
       console.log(
         chalk.yellow(`  Stop signal sent to run "${runId}".`)

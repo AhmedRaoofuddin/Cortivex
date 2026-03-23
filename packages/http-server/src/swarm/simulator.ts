@@ -1,7 +1,8 @@
 /**
- * SwarmSimulator — Broadcasts realistic SWARM consensus events
- * over WebSocket during pipeline execution.
+ * SwarmSimulator — Broadcasts simulated swarm consensus events
+ * over WebSocket for dashboard visualization and testing.
  *
+ * This is a visualization aid, not a production consensus implementation.
  * Events: leader_elected, vote_cast, heartbeat, agent_died,
  * agent_respawned, task_rebalanced, knowledge_synced, quorum_check
  */
