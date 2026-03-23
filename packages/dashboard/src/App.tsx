@@ -1,4 +1,11 @@
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
+
+// Error boundary to prevent component crashes from killing the whole app
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() { return this.state.hasError ? null : this.props.children; }
+}
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
 import { StatusBar } from '@/components/StatusBar';
@@ -220,8 +227,10 @@ export default function App() {
           <StatusBar />
         </div>
 
-        {/* Command Palette (Cmd+K) */}
-        <CommandPalette />
+        {/* Command Palette (Cmd+K) — wrapped to prevent crash from taking down the app */}
+        <ErrorBoundary>
+          <CommandPalette />
+        </ErrorBoundary>
 
         {/* Toast notifications */}
         <Toaster />

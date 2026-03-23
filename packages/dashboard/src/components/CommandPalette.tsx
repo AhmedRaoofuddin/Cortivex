@@ -35,7 +35,8 @@ const viewCommands: { id: ViewType; label: string; icon: typeof Workflow }[] = [
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
-  const { setActiveView, pipelines, loadPipelineIntoEditor, runPipeline } = useCortivexStore();
+  const { setActiveView, pipelines: rawPipelines, loadPipelineIntoEditor, runPipeline } = useCortivexStore();
+  const pipelines = Array.isArray(rawPipelines) ? rawPipelines : [];
 
   // Cmd+K / Ctrl+K to open
   useEffect(() => {
