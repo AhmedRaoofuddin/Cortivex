@@ -94,7 +94,7 @@ You can also run pipelines from inside Claude Code using slash commands:
 Describe what you want in plain English:
 
 ```bash
-cortivex create "find security issues and fix them" --save-as security-fix
+cortivex create security-fix --description "find security issues and fix them"
 ```
 
 Cortivex analyzes the description, selects appropriate agent node types, determines their dependencies, and generates a YAML pipeline definition. The pipeline is saved to `.cortivex/pipelines/security-fix.yaml`.
@@ -108,9 +108,9 @@ cortivex run security-fix
 More examples of natural language pipeline creation:
 
 ```bash
-cortivex create "migrate all JS files to TypeScript" --save-as ts-migrate
-cortivex create "run full test suite and boost coverage" --save-as test-boost
-cortivex create "review code, write docs, and create a changelog" --save-as release-prep
+cortivex create ts-migrate --description "migrate all JS files to TypeScript"
+cortivex create test-boost --description "run full test suite and boost coverage"
+cortivex create release-prep --description "review code, write docs, and create a changelog"
 ```
 
 ---

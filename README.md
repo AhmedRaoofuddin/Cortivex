@@ -438,13 +438,16 @@ Six orchestration node types (SwarmCoordinator, AgentMonitor, ConsensusManager, 
 The Cortivex MCP server exposes tools for programmatic access from Claude Code or any MCP client.
 
 <details>
-<summary><strong>View all MCP tools</strong></summary>
+<summary><strong>View all 17 MCP tools</strong></summary>
 
 | Category | Tools |
 |----------|-------|
-| Pipeline | `cortivex_run`, `cortivex_create`, `cortivex_list`, `cortivex_status` |
+| Pipeline | `cortivex_run`, `cortivex_create`, `cortivex_list`, `cortivex_status`, `cortivex_stop` |
+| Knowledge | `cortivex_knowledge`, `cortivex_decompose` |
+| Agents | `cortivex_nodes`, `cortivex_templates`, `cortivex_agent`, `cortivex_scale`, `cortivex_tasks` |
 | Mesh | `cortivex_mesh` |
 | Learning | `cortivex_insights`, `cortivex_history` |
+| Configuration | `cortivex_config` |
 | Export | `cortivex_export` |
 
 </details>
@@ -453,7 +456,7 @@ The Cortivex MCP server exposes tools for programmatic access from Claude Code o
 
 ## Dashboard
 
-The visual dashboard is available at `localhost:4200` after running `cortivex ui`. It provides four views:
+The visual dashboard is available at `localhost:4200` after running `cortivex ui`. It provides seven views:
 
 **Pipeline Editor**: Drag agent nodes from a palette, connect outputs to inputs, configure models and parameters per node. The editor validates the DAG in real-time and flags cycles or missing dependencies.
 
@@ -461,7 +464,13 @@ The visual dashboard is available at `localhost:4200` after running `cortivex ui
 
 **Mesh Visualization**: Real-time swarm coordination view showing leader/follower/candidate roles, animated heartbeat and vote particles, election cycles, and a live event log.
 
-**Analytics**: Track pipeline improvement over time with success rate, cost trends, and duration charts. View discovered insights with confidence scores and application status.
+**Metrics**: Track pipeline improvement over time with success rate, cost trends, and duration charts. View aggregate statistics across all pipeline runs.
+
+**Knowledge Graph**: Interactive graph visualization of project entities, file relationships, and dependency structures discovered across pipeline executions.
+
+**Learning**: View discovered insights with confidence scores and application status. Monitor how the learning engine adapts pipeline behavior based on historical run data.
+
+**Timeline**: Chronological view of all pipeline runs showing per-node execution order, durations, costs, and outcomes in a visual timeline layout.
 
 ---
 
@@ -481,6 +490,9 @@ The visual dashboard is available at `localhost:4200` after running `cortivex ui
 | `cortivex export <pipeline>` | Export pipeline to n8n, JSON, or YAML format |
 | `cortivex insights` | Show learned patterns and execution statistics |
 | `cortivex mesh` | Show mesh coordination state |
+| `cortivex status [runId]` | Show the status of a pipeline run (defaults to most recent) |
+| `cortivex stop <runId>` | Send a stop signal to a running pipeline |
+| `cortivex install-skills` | Install Cortivex skills into the current project |
 
 ### Integrations
 

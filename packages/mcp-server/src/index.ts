@@ -2,7 +2,7 @@
 /**
  * Cortivex MCP Server
  *
- * Exposes 8 tools for building, running, and managing AI agent pipelines
+ * Exposes 17 tools for building, running, and managing AI agent pipelines
  * via the Model Context Protocol over stdio.
  */
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -20,6 +20,15 @@ import { meshTool } from './tools/mesh.js';
 import { insightsTool } from './tools/insights.js';
 import { historyTool } from './tools/history.js';
 import { exportTool } from './tools/export.js';
+import { stopTool } from './tools/stop.js';
+import { knowledgeTool } from './tools/knowledge.js';
+import { decomposeTool } from './tools/decompose.js';
+import { nodesTool } from './tools/nodes.js';
+import { templatesTool } from './tools/templates.js';
+import { configTool } from './tools/config.js';
+import { tasksTool } from './tools/tasks.js';
+import { scaleTool } from './tools/scale.js';
+import { agentTool } from './tools/agent.js';
 
 // ── Tool Definitions ─────────────────────────────────────────────────
 
@@ -181,6 +190,182 @@ const TOOLS = [
       required: ['pipeline', 'format'],
     },
   },
+  {
+    name: 'cortivex_stop',
+    description:
+      'Stop a running pipeline by its run ID. Cancels execution and stops all active nodes. ' +
+      'Nodes that have already completed will retain their results. Use cortivex_status to find active run IDs.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        runId: {
+          type: 'string',
+          description: 'The run ID of the pipeline to stop. Use cortivex_status to find active run IDs.',
+        },
+      },
+      required: ['runId'],
+    },
+  },
+  {
+    name: 'cortivex_knowledge',
+    description:
+      'Query the shared CRDT knowledge graph. Shows entries discovered by agents during pipeline execution, ' +
+      'including findings, relationships, and deduplication status. The knowledge graph prevents duplicate ' +
+      'analysis across agents and enables cross-agent synthesis.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Optional search query to filter knowledge entries.',
+        },
+        nodeType: {
+          type: 'string',
+          description: 'Optional node type to filter entries by (e.g., "finding", "recommendation", "dependency").',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of entries to return (default: 50).',
+        },
+      },
+    },
+  },
+  {
+    name: 'cortivex_decompose',
+    description:
+      'Decompose a task description into subtasks with dependency ordering, priority assignment, and cost estimation. ' +
+      'Analyzes the description to identify appropriate agent types and their execution order. ' +
+      'Returns a structured task breakdown that can be used to create a pipeline.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        description: {
+          type: 'string',
+          description:
+            'Natural language description of the task to decompose. Examples: ' +
+            '"review code, fix bugs, and run tests", "migrate to TypeScript and update docs".',
+        },
+        maxDepth: {
+          type: 'number',
+          description: 'Maximum decomposition depth for nested subtasks (default: 3).',
+        },
+      },
+      required: ['description'],
+    },
+  },
+  {
+    name: 'cortivex_nodes',
+    description:
+      'List all available agent node types with their configurations, default models, cost baselines, ' +
+      'and success rates. Can be filtered by category (quality, security, testing, devops, docs, refactoring, analysis).',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        category: {
+          type: 'string',
+          description: 'Optional category to filter node types: "quality", "security", "testing", "devops", "docs", "refactoring", "analysis".',
+        },
+      },
+    },
+  },
+  {
+    name: 'cortivex_templates',
+    description:
+      'List available pipeline templates with details. Templates are pre-built pipeline configurations ' +
+      'for common tasks like PR review, security audit, test generation, and more. ' +
+      'Each template includes node count, tags, and description.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        tag: {
+          type: 'string',
+          description: 'Optional tag to filter templates (e.g., "security", "testing", "review").',
+        },
+      },
+    },
+  },
+  {
+    name: 'cortivex_config',
+    description:
+      'Get or set Cortivex configuration values. When action is "get", returns the current configuration ' +
+      '(all keys or a specific key). When action is "set", updates a configuration value. ' +
+      'Configuration is stored in .cortivex/config.json.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['get', 'set'],
+          description: 'Action to perform: "get" to read config, "set" to update config.',
+        },
+        key: {
+          type: 'string',
+          description: 'Configuration key to get or set (e.g., "defaultModel", "parallelism", "verbose").',
+        },
+        value: {
+          description: 'Value to set for the key (required when action is "set"). Can be string, number, boolean, or object.',
+        },
+      },
+      required: ['action'],
+    },
+  },
+  {
+    name: 'cortivex_tasks',
+    description:
+      'List active tasks across all running pipelines. Shows each node/agent task with its status, progress, ' +
+      'cost, and which pipeline run it belongs to. Can be filtered by status.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        status: {
+          type: 'string',
+          enum: ['pending', 'running', 'completed', 'failed', 'skipped'],
+          description: 'Optional status filter to show only tasks with a specific status.',
+        },
+      },
+    },
+  },
+  {
+    name: 'cortivex_scale',
+    description:
+      'Adjust the agent pool size to control how many agents run concurrently during pipeline execution. ' +
+      'Can be set globally or per node type. Higher values increase parallelism but also increase API costs.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        poolSize: {
+          type: 'number',
+          description: 'Desired pool size (1-20). Controls maximum concurrent agents.',
+        },
+        nodeType: {
+          type: 'string',
+          description: 'Optional node type to scope the pool size change (e.g., "CodeReviewer"). If omitted, sets the global pool size.',
+        },
+      },
+      required: ['poolSize'],
+    },
+  },
+  {
+    name: 'cortivex_agent',
+    description:
+      'Get detailed information about a specific agent in a running or completed pipeline. ' +
+      'Shows status, progress, cost, tokens, files modified, and output. ' +
+      'Can search across all active runs or within a specific run.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        agentId: {
+          type: 'string',
+          description: 'The node ID of the agent to inspect (e.g., "security_scan", "code_review").',
+        },
+        runId: {
+          type: 'string',
+          description: 'Optional run ID to scope the search. If omitted, searches all active runs.',
+        },
+      },
+      required: ['agentId'],
+    },
+  },
 ];
 
 // ── Server Setup ─────────────────────────────────────────────────────
@@ -313,6 +498,91 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error(`Invalid format "${typedArgs.format}". Must be one of: ${validFormats.join(', ')}`);
         }
         return await exportTool(typedArgs);
+      }
+
+      case 'cortivex_stop': {
+        const typedArgs = args as { runId: string };
+        validateString(typedArgs.runId, 'runId', 256);
+        return await stopTool(typedArgs);
+      }
+
+      case 'cortivex_knowledge': {
+        const typedArgs = args as { query?: string; nodeType?: string; limit?: number };
+        if (typedArgs.query !== undefined) {
+          validateString(typedArgs.query, 'query', 2048);
+        }
+        if (typedArgs.limit !== undefined) {
+          typedArgs.limit = validateLimit(typedArgs.limit);
+        }
+        return await knowledgeTool(typedArgs);
+      }
+
+      case 'cortivex_decompose': {
+        const typedArgs = args as { description: string; maxDepth?: number };
+        validateString(typedArgs.description, 'description', 4096);
+        return await decomposeTool(typedArgs);
+      }
+
+      case 'cortivex_nodes': {
+        const typedArgs = args as { category?: string };
+        if (typedArgs.category !== undefined) {
+          const validCategories = ['quality', 'security', 'testing', 'devops', 'docs', 'refactoring', 'analysis'];
+          if (!validCategories.includes(typedArgs.category)) {
+            throw new Error(`Invalid category "${typedArgs.category}". Must be one of: ${validCategories.join(', ')}`);
+          }
+        }
+        return await nodesTool(typedArgs);
+      }
+
+      case 'cortivex_templates': {
+        const typedArgs = args as { tag?: string };
+        if (typedArgs.tag !== undefined) {
+          validateString(typedArgs.tag, 'tag', 64);
+        }
+        return await templatesTool(typedArgs);
+      }
+
+      case 'cortivex_config': {
+        const typedArgs = args as { action: 'get' | 'set'; key?: string; value?: unknown };
+        const validActions = ['get', 'set'];
+        if (!validActions.includes(typedArgs.action)) {
+          throw new Error(`Invalid action "${typedArgs.action}". Must be one of: ${validActions.join(', ')}`);
+        }
+        if (typedArgs.key !== undefined) {
+          validateString(typedArgs.key, 'key', 128);
+        }
+        return await configTool(typedArgs);
+      }
+
+      case 'cortivex_tasks': {
+        const typedArgs = args as { status?: string };
+        if (typedArgs.status !== undefined) {
+          const validStatuses = ['pending', 'running', 'completed', 'failed', 'skipped'];
+          if (!validStatuses.includes(typedArgs.status)) {
+            throw new Error(`Invalid status "${typedArgs.status}". Must be one of: ${validStatuses.join(', ')}`);
+          }
+        }
+        return await tasksTool(typedArgs);
+      }
+
+      case 'cortivex_scale': {
+        const typedArgs = args as { poolSize: number; nodeType?: string };
+        if (typeof typedArgs.poolSize !== 'number' || typedArgs.poolSize < 1 || typedArgs.poolSize > 20) {
+          throw new Error('poolSize must be a number between 1 and 20');
+        }
+        if (typedArgs.nodeType !== undefined) {
+          validateString(typedArgs.nodeType, 'nodeType', 128);
+        }
+        return await scaleTool(typedArgs);
+      }
+
+      case 'cortivex_agent': {
+        const typedArgs = args as { agentId: string; runId?: string };
+        validateString(typedArgs.agentId, 'agentId', 256);
+        if (typedArgs.runId !== undefined) {
+          validateString(typedArgs.runId, 'runId', 256);
+        }
+        return await agentTool(typedArgs);
       }
 
       default:

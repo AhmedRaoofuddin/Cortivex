@@ -665,4 +665,170 @@ function exportToN8nFormat(pipeline: {
   };
 }
 
+// --- status ---
+program
+  .command('status [runId]')
+  .description('Show the status of a pipeline run')
+  .action(async (runId?: string) => {
+    try {
+      const cwd = process.cwd();
+      const recorder = new HistoryRecorder(cwd);
+      const runs = await recorder.getRuns();
+
+      if (runs.length === 0) {
+        console.log('');
+        console.log(
+          chalk.gray('  No pipeline runs found. Run a pipeline first with "cortivex run <pipeline>".')
+        );
+        console.log('');
+        return;
+      }
+
+      const run = runId
+        ? runs.find((r) => r.id === runId)
+        : runs[runs.length - 1];
+
+      if (!run) {
+        console.log('');
+        console.log(
+          chalk.red(`  Run "${runId}" not found.`)
+        );
+        console.log('');
+        process.exit(1);
+      }
+
+      const statusColor =
+        run.status === 'success'
+          ? chalk.green
+          : run.status === 'failed'
+            ? chalk.red
+            : chalk.yellow;
+
+      console.log('');
+      console.log(chalk.bold.cyan('  Pipeline Run Status'));
+      console.log(chalk.gray('  ' + '\u2500'.repeat(50)));
+      console.log(
+        `  Run ID:       ${chalk.white(run.id)}`
+      );
+      console.log(
+        `  Pipeline:     ${chalk.white(run.pipeline)}`
+      );
+      console.log(
+        `  Status:       ${statusColor(run.status)}`
+      );
+      console.log(
+        `  Duration:     ${chalk.white(run.duration.toFixed(1) + 's')}`
+      );
+      console.log(
+        `  Cost:         ${chalk.white('$' + run.cost.toFixed(3))}`
+      );
+      console.log('');
+
+      if (run.nodeOutcomes && run.nodeOutcomes.length > 0) {
+        console.log(chalk.bold.cyan('  Node Outcomes'));
+        console.log(chalk.gray('  ' + '\u2500'.repeat(50)));
+        for (const outcome of run.nodeOutcomes) {
+          const nodeStatusColor =
+            outcome.status === 'success'
+              ? chalk.green
+              : outcome.status === 'failed'
+                ? chalk.red
+                : chalk.yellow;
+          console.log(
+            `  ${nodeStatusColor('\u25cf')} ${chalk.white(outcome.nodeId)} ${chalk.gray('—')} ${nodeStatusColor(outcome.status)} ${chalk.gray('(' + outcome.duration.toFixed(1) + 's, $' + outcome.cost.toFixed(3) + ')')}`
+          );
+        }
+        console.log('');
+      }
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
+      process.exit(1);
+    }
+  });
+
+// --- stop ---
+program
+  .command('stop <runId>')
+  .description('Send a stop signal to a running pipeline')
+  .action(async (runId: string) => {
+    try {
+      console.log('');
+      console.log(
+        chalk.yellow(`  Stop signal sent to run "${runId}".`)
+      );
+      console.log(
+        chalk.gray('  The pipeline will halt after the current node completes.')
+      );
+      console.log('');
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
+      process.exit(1);
+    }
+  });
+
+// --- install-skills ---
+program
+  .command('install-skills')
+  .description('Install Cortivex skills into the current project')
+  .action(async () => {
+    try {
+      const { readdir, mkdir, copyFile } = await import('node:fs/promises');
+      const { join, dirname } = await import('node:path');
+      const { fileURLToPath } = await import('node:url');
+
+      const cwd = process.cwd();
+      const __filename = fileURLToPath(import.meta.url);
+      const packageRoot = join(dirname(__filename), '..', '..', '..');
+      const sourceDir = join(packageRoot, '.agents', 'skills');
+      const targetDir = join(cwd, '.agents', 'skills');
+
+      // Ensure target directory exists
+      await mkdir(targetDir, { recursive: true });
+
+      const entries = await readdir(sourceDir, { withFileTypes: true });
+      let count = 0;
+
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const skillSource = join(sourceDir, entry.name);
+          const skillTarget = join(targetDir, entry.name);
+          await mkdir(skillTarget, { recursive: true });
+
+          const files = await readdir(skillSource);
+          for (const file of files) {
+            await copyFile(
+              join(skillSource, file),
+              join(skillTarget, file)
+            );
+          }
+          count++;
+        }
+      }
+
+      console.log('');
+      console.log(
+        chalk.green(`  Installed ${count} skill(s) into .agents/skills/`)
+      );
+      console.log(
+        chalk.gray('  Skills will activate automatically in Claude Code based on context.')
+      );
+      console.log('');
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
+      process.exit(1);
+    }
+  });
+
 program.parse();

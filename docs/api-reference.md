@@ -17,7 +17,7 @@ Add the Cortivex MCP server to your Claude Code settings (`~/.claude/settings.js
   "mcpServers": {
     "cortivex": {
       "command": "npx",
-      "args": ["-y", "cortivex", "mcp-serve"]
+      "args": ["-y", "cortivex", "serve", "--mcp"]
     }
   }
 }
