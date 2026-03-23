@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { Search, X, ZoomIn, ZoomOut, Maximize2, Filter } from 'lucide-react';
 import { useCortivexStore } from '@/stores/cortivexStore';
-import { fetchHistory as apiFetchHistory } from '@/lib/api';
+// History is loaded by the store's fetchInitialData
 
 // ============================================
 // CORTIVEX KNOWLEDGE GRAPH VIEW
@@ -314,22 +314,12 @@ export function KnowledgeGraphView() {
   const [selectedNode, setSelectedNode] = useState<SimNode | null>(null);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showEdgeLabels, setShowEdgeLabels] = useState(false);
-  const [apiHistory, setApiHistory] = useState<{ pipelineName: string; nodesRun: number; success: boolean; cost: number; tokensUsed: number; duration: number; runNumber: number }[] | null>(null);
+
 
   const { history: storeHistory } = useCortivexStore();
 
-  // Fetch history from API on mount
-  useEffect(() => {
-    apiFetchHistory()
-      .then((data) => setApiHistory(data))
-      .catch(() => {
-        // API unavailable — will use store history or demo fallback
-        setApiHistory(null);
-      });
-  }, []);
-
-  // Build graph from real execution history, fall back to demo graph
-  const sourceHistory = apiHistory ?? storeHistory;
+  // Use store history directly — fetchInitialData already loaded it
+  const sourceHistory = storeHistory;
   const realGraph = useMemo(() => buildGraphFromHistory(sourceHistory), [sourceHistory]);
   const demoGraph = useMemo(() => generateDemoGraph(), []);
   const baseGraph = realGraph ?? demoGraph;

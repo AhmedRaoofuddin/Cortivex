@@ -145,32 +145,38 @@ export const useCortivexStore = create<CortivexState>((set, get) => ({
   // ============================================
 
   fetchInitialData: async () => {
-    set({ isLoading: true });
+    // Guard against duplicate calls (React strict mode double-mount)
+    if (!get().isLoading) return;
 
-    // Fetch all endpoints in parallel, falling back to demo data on failure
-    const [pipelines, meshClaims, meshConflicts, insights, history] =
-      await Promise.all([
-        apiFetchPipelines().catch(() => {
-          console.warn('[Cortivex] /api/pipelines unavailable, using demo data');
-          return demoPipelines;
-        }),
-        apiFetchMeshClaims().catch(() => {
-          console.warn('[Cortivex] /api/mesh/claims unavailable, using demo data');
-          return demoMeshClaims;
-        }),
-        apiFetchMeshConflicts().catch(() => {
-          console.warn('[Cortivex] /api/mesh/conflicts unavailable, using demo data');
-          return demoMeshConflicts;
-        }),
-        apiFetchInsights().catch(() => {
-          console.warn('[Cortivex] /api/learning/insights unavailable, using demo data');
-          return demoInsights;
-        }),
-        apiFetchHistory().catch(() => {
-          console.warn('[Cortivex] /api/learning/history unavailable, using demo data');
-          return demoHistory;
-        }),
-      ]);
+    // Quick connectivity check — one small request to avoid 5 parallel failures
+    let serverOnline = false;
+    try {
+      const res = await fetch('/api/pipelines', { signal: AbortSignal.timeout(2000) });
+      if (res.ok) serverOnline = true;
+    } catch {
+      // Server offline — skip all API calls
+    }
+
+    let pipelines, meshClaims, meshConflicts, insights, history;
+
+    if (serverOnline) {
+      // Fetch all endpoints in parallel
+      [pipelines, meshClaims, meshConflicts, insights, history] =
+        await Promise.all([
+          apiFetchPipelines().catch(() => demoPipelines),
+          apiFetchMeshClaims().catch(() => demoMeshClaims),
+          apiFetchMeshConflicts().catch(() => demoMeshConflicts),
+          apiFetchInsights().catch(() => demoInsights),
+          apiFetchHistory().catch(() => demoHistory),
+        ]);
+    } else {
+      console.warn('[Cortivex] HTTP server offline — using demo data');
+      pipelines = demoPipelines;
+      meshClaims = demoMeshClaims;
+      meshConflicts = demoMeshConflicts;
+      insights = demoInsights;
+      history = demoHistory;
+    }
 
     // If no mesh events came from API, use demo events as seed
     const meshEvents = demoMeshEvents;
