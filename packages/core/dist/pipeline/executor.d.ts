@@ -28,6 +28,8 @@ export declare class PipelineExecutor extends EventEmitter<ExecutorEvents> {
     private getFilesForNode;
     private dryRun;
     private chunkArray;
+    private checkStopSignal;
+    private cleanupStopSignal;
     private delay;
 }
 //# sourceMappingURL=executor.d.ts.map

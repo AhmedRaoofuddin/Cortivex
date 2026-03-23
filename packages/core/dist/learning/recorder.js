@@ -176,6 +176,19 @@ export class HistoryRecorder {
         }
         return pruned;
     }
+    /**
+     * Get all execution runs (alias for getHistory).
+     */
+    async getRuns() {
+        return this.getHistory();
+    }
+    /**
+     * Get a single execution record by its run ID.
+     */
+    async getRunById(runId) {
+        const records = await this.getHistory();
+        return records.find((record) => record.id === runId) ?? null;
+    }
     calculateDuration(startedAt, completedAt) {
         if (!startedAt || !completedAt)
             return 0;

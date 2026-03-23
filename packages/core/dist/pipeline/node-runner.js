@@ -163,7 +163,7 @@ export class NodeRunner extends EventEmitter {
         const prompt = this.buildPrompt(node, nodeType, context);
         // Use Claude CLI in non-streaming mode for light nodes
         return new Promise((resolve, reject) => {
-            const args = ['--print', '--model', model, '-p', prompt];
+            const args = ['--print', '--output-format', 'json', '--model', model, '-p', prompt];
             const child = spawn('claude', args, {
                 cwd: context.targetDir,
                 env: { ...process.env },
@@ -188,11 +188,34 @@ export class NodeRunner extends EventEmitter {
                     reject(new Error(`Light node "${node.id}" failed (exit code ${code}): ${stderr.slice(0, 500)}`));
                     return;
                 }
+                // Parse the JSON result from stdout (same logic as runHeavyNode)
+                let totalCost = 0;
+                let totalTokens = 0;
+                let resultText = '';
+                const lines = stdout.split('\n').filter(Boolean);
+                for (let i = lines.length - 1; i >= 0; i--) {
+                    try {
+                        const parsed = JSON.parse(lines[i]);
+                        if (parsed.type === 'result') {
+                            resultText = parsed.result || '';
+                            totalCost = parsed.total_cost_usd || 0;
+                            const usage = parsed.usage || {};
+                            totalTokens = (usage.input_tokens || 0) +
+                                (usage.output_tokens || 0) +
+                                (usage.cache_read_input_tokens || 0) +
+                                (usage.cache_creation_input_tokens || 0);
+                            break;
+                        }
+                    }
+                    catch {
+                        // Not JSON, skip
+                    }
+                }
                 this.emit('progress', node.id, 100, 'Done');
                 resolve({
-                    output: stdout,
-                    cost: 0.01, // Estimated cost for light nodes
-                    tokens: Math.ceil(stdout.length / 4),
+                    output: resultText || stdout,
+                    cost: totalCost,
+                    tokens: totalTokens,
                     filesModified: [],
                 });
             });

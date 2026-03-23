@@ -120,7 +120,7 @@ export interface Insight {
     details: Record<string, unknown>;
     discoveredAt: string;
 }
-export type InsightAction = 'reorder' | 'substitute_model' | 'skip_node' | 'add_node';
+export type InsightAction = 'reorder' | 'substitute_model' | 'skip_node' | 'add_node' | 'adjust_config' | 'adjust_timeout';
 export interface PipelineEvent {
     type: PipelineEventType;
     timestamp: string;

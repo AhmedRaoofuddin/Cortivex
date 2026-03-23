@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { readFile, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import { EventEmitter } from 'eventemitter3';
 import { NodeRunner } from './node-runner.js';
 import { MeshManager } from '../mesh/manager.js';
@@ -113,6 +115,10 @@ export class PipelineExecutor extends EventEmitter {
                             aborted = true;
                         }
                     }
+                    // Check for external stop signal
+                    if (!aborted && (await this.checkStopSignal(runId))) {
+                        aborted = true;
+                    }
                 }
             }
             // Mark remaining pending nodes as skipped if we aborted
@@ -132,6 +138,8 @@ export class PipelineExecutor extends EventEmitter {
             run.filesModified = [...new Set(run.filesModified)];
             // Record history
             await this.recorder.record(run);
+            // Clean up stop signal file if it exists
+            await this.cleanupStopSignal(runId);
             if (run.status === 'completed') {
                 this.emit('pipeline:complete', run);
             }
@@ -350,6 +358,25 @@ export class PipelineExecutor extends EventEmitter {
             chunks.push(array.slice(i, i + size));
         }
         return chunks;
+    }
+    async checkStopSignal(runId) {
+        try {
+            const signalPath = join(process.cwd(), '.cortivex', 'signals', `stop-${runId}.json`);
+            await readFile(signalPath, 'utf-8');
+            return true;
+        }
+        catch {
+            return false;
+        }
+    }
+    async cleanupStopSignal(runId) {
+        try {
+            const signalPath = join(process.cwd(), '.cortivex', 'signals', `stop-${runId}.json`);
+            await unlink(signalPath);
+        }
+        catch {
+            // Signal file doesn't exist, nothing to clean up
+        }
     }
     delay(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));

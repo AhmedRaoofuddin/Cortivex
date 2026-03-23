@@ -18,6 +18,14 @@ export declare class HistoryRecorder {
      * Delete all history older than the specified number of days.
      */
     prune(olderThanDays: number): Promise<number>;
+    /**
+     * Get all execution runs (alias for getHistory).
+     */
+    getRuns(): Promise<ExecutionRecord[]>;
+    /**
+     * Get a single execution record by its run ID.
+     */
+    getRunById(runId: string): Promise<ExecutionRecord | null>;
     private calculateDuration;
     private sanitizeTimestamp;
     private detectRepoContext;
