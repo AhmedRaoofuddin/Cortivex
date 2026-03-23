@@ -393,9 +393,9 @@ export function LearningView() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {insights.map((insight, i) => {
-                const Icon = insightIcons[insight.action];
-                const color = insightColors[insight.action];
-                const categoryColor = CATEGORY_COLORS[insight.category];
+                const Icon = insightIcons[insight.action] ?? Zap;
+                const color = insightColors[insight.action] ?? '#4F8EF7';
+                const categoryColor = insight.category ? CATEGORY_COLORS[insight.category] ?? '#4F8EF7' : '#4F8EF7';
 
                 return (
                   <motion.div
@@ -442,7 +442,7 @@ export function LearningView() {
                                   borderColor: `${categoryColor}30`,
                                 }}
                               >
-                                {insight.category}
+                                {insight.category ?? insight.action}
                               </Badge>
                             </div>
                           </div>
@@ -450,7 +450,7 @@ export function LearningView() {
                         <Separator className="my-3" />
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-text-dim">
-                            Impact: <span className="text-text-muted">{insight.impact}</span>
+                            Impact: <span className="text-text-muted">{insight.impact ?? `${insight.basedOnRuns} runs analyzed`}</span>
                           </span>
                           <span className="text-[9px] font-mono text-text-dim">
                             {new Date(insight.discoveredAt).toLocaleDateString()}
@@ -611,7 +611,7 @@ function SuggestionCard({
               </p>
               <div className="flex flex-wrap items-center gap-1.5">
                 <Badge variant={typeConfig.badgeVariant} className="text-[9px]">
-                  {suggestion.impact}
+                  {suggestion.impact ?? 'optimization'}
                 </Badge>
                 <Badge variant="success" className="text-[9px]">
                   {(suggestion.confidence * 100).toFixed(0)}% confidence

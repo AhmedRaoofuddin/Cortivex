@@ -204,30 +204,29 @@ export function MeshView() {
   const [events, setEvents] = useState<SimEvent[]>([]);
   const [cluster, setCluster] = useState({ term: 0, leaderId: '' });
   const [panelOpen, setPanelOpen] = useState(true);
-  const bootstrappedRef = useRef(false);
 
-  // Populate agents from ANY mesh events (not just BOOTSTRAP)
+  // Derive agents directly from mesh events (no ref gate — works with strict mode)
   useEffect(() => {
     if (storeMeshEvents.length === 0) return;
 
     // Extract unique agent names from all events
     const agentNames = new Set<string>();
     for (const e of storeMeshEvents) {
-      if (e.agentName && e.agentName !== 'System' && e.agentName !== 'Monitor') {
+      if (e.agentName && e.agentName !== 'System' && e.agentName !== 'Monitor' && e.agentName !== 'SwarmSimulator') {
         agentNames.add(e.agentName);
       }
     }
 
-    if (agentNames.size > 0 && !bootstrappedRef.current) {
-      bootstrappedRef.current = true;
-
-      // Build agents from event data
+    if (agentNames.size > 0) {
+      // Build agents from event data — re-derive on every change
       const discovered: SimAgent[] = Array.from(agentNames).map((name) => {
-        // Find the latest event for this agent to get role/token info
-        const latest = storeMeshEvents.find((e) => e.agentName === name);
+        // Find ALL events for this agent to build accurate state
+        const agentEvents = storeMeshEvents.filter((e) => e.agentName === name);
+        const latest = agentEvents[0]; // events are newest-first
         const details = latest?.details ?? '';
-        const isLeader = details.toLowerCase().includes('leader');
-        const isDead = details.toLowerCase().includes('died') || details.toLowerCase().includes('dead');
+        const allDetails = agentEvents.map(e => e.details).join(' ').toLowerCase();
+        const isLeader = allDetails.includes('leader');
+        const isDead = allDetails.includes('died') || allDetails.includes('dead');
         const tokenMatch = details.match(/([\d.]+)K?\s*tokens/i);
         const tokens = tokenMatch ? parseFloat(tokenMatch[1]) * (details.includes('K') ? 1000 : 1) : 0;
 
@@ -244,7 +243,7 @@ export function MeshView() {
       setAgents(discovered);
     }
 
-    // Always sync events to the panel
+    // Sync events to the panel
     const simEvents: SimEvent[] = storeMeshEvents.map((e) => ({
       id: e.id,
       type: e.type,
