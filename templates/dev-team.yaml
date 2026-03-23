@@ -10,96 +10,85 @@ estimated_duration: "8-15 minutes"
 
 nodes:
   - id: architect
-    type: architect-analyzer
-    name: "🏗️ Architect"
-    model: claude-sonnet-4
+    type: ArchitectAnalyzer
+    depends_on: []
     config:
+      model: claude-sonnet-4
       temperature: 0.3
-    instructions: |
-      You are the ARCHITECT on a software engineering team.
+      instructions: |
+        You are the ARCHITECT on a software engineering team.
 
-      TASK: {{task}}
+        TASK: {{task}}
 
-      Your job:
-      1. Analyze the codebase structure
-      2. Decide which files need to be created or modified
-      3. Design the approach — what patterns to use, what interfaces to define
-      4. Write a brief technical spec (max 200 words) in .cortivex/specs/current-task.md
+        Your job:
+        1. Analyze the codebase structure
+        2. Decide which files need to be created or modified
+        3. Design the approach — what patterns to use, what interfaces to define
+        4. Write a brief technical spec (max 200 words) in .cortivex/specs/current-task.md
 
-      Output: A clear technical plan that the Developer agent can follow.
-      Do NOT write implementation code — only the design.
+        Output: A clear technical plan that the Developer agent can follow.
+        Do NOT write implementation code — only the design.
 
   - id: developer
-    type: code-reviewer
-    name: "👨‍💻 Developer"
-    model: claude-sonnet-4
+    type: AutoFixer
     depends_on: [architect]
     config:
+      model: claude-sonnet-4
       temperature: 0.2
-    instructions: |
-      You are the DEVELOPER on a software engineering team.
+      instructions: |
+        You are the DEVELOPER on a software engineering team.
 
-      TASK: {{task}}
+        TASK: {{task}}
 
-      Read the architect's spec at .cortivex/specs/current-task.md
+        Read the architect's spec at .cortivex/specs/current-task.md
 
-      Your job:
-      1. Implement the code changes exactly as the architect designed
-      2. Follow existing code conventions in the project
-      3. Write clean, well-commented code
-      4. Create any new files needed
+        Your job:
+        1. Implement the code changes exactly as the architect designed
+        2. Follow existing code conventions in the project
+        3. Write clean, well-commented code
+        4. Create any new files needed
 
-      Output: Working implementation code committed to the codebase.
+        Output: Working implementation code committed to the codebase.
 
   - id: tester
-    type: test-generator
-    name: "🧪 Tester"
-    model: claude-sonnet-4
+    type: TestGenerator
     depends_on: [developer]
     config:
+      model: claude-sonnet-4
       temperature: 0.2
-    instructions: |
-      You are the TESTER on a software engineering team.
+      instructions: |
+        You are the TESTER on a software engineering team.
 
-      TASK: {{task}}
+        TASK: {{task}}
 
-      The Developer just implemented the code changes.
+        The Developer just implemented the code changes.
 
-      Your job:
-      1. Read what was implemented
-      2. Write unit tests covering the new functionality
-      3. Write edge case tests
-      4. Run the tests and report results
+        Your job:
+        1. Read what was implemented
+        2. Write unit tests covering the new functionality
+        3. Write edge case tests
+        4. Run the tests and report results
 
-      Output: Test files and a pass/fail summary.
+        Output: Test files and a pass/fail summary.
 
   - id: reviewer
-    type: code-reviewer
-    name: "🔍 Reviewer"
-    model: claude-sonnet-4
+    type: CodeReviewer
     depends_on: [tester]
     config:
+      model: claude-sonnet-4
       temperature: 0.3
-    instructions: |
-      You are the CODE REVIEWER on a software engineering team.
+      instructions: |
+        You are the CODE REVIEWER on a software engineering team.
 
-      TASK: {{task}}
+        TASK: {{task}}
 
-      The Developer implemented and the Tester wrote tests.
+        The Developer implemented and the Tester wrote tests.
 
-      Your job:
-      1. Review ALL code changes made by the Developer
-      2. Check: correctness, edge cases, security, performance, readability
-      3. Check that tests are comprehensive
-      4. Write a review summary in .cortivex/reviews/current-review.md
-      5. If issues found, list them clearly
+        Your job:
+        1. Review ALL code changes made by the Developer
+        2. Check: correctness, edge cases, security, performance, readability
+        3. Check that tests are comprehensive
+        4. Write a review summary in .cortivex/reviews/current-review.md
+        5. If issues found, list them clearly
 
-      Output: Code review report with approval/rejection and any findings.
-
-connections:
-  - source: architect
-    target: developer
-  - source: developer
-    target: tester
-  - source: tester
-    target: reviewer
+        Output: Code review report with approval/rejection and any findings.
