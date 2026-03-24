@@ -36,7 +36,7 @@ Most Claude Code skills tell agents what to do. Cortivex teaches agents how to t
 
 > **Why the name?** Cortivex combines "cortex" (the thinking layer of the brain) and "vex" (the mesh that connects agents together). The cortex reasons. The vex coordinates. Together, they form an orchestration system where agents don't just execute instructions, they reason through decisions, avoid known mistakes, and handle ambiguity without human intervention.
 
-Every skill in this library is a 450-1,200 line operational manual. Not a thin wrapper. Not a checklist. Each one includes reasoning protocols that force step-by-step thinking before action, anti-pattern tables with WRONG/RIGHT code examples showing exactly what fails and why, grounding rules for when the situation is uncertain, and Advanced Capabilities sections with production-grade MCP tool examples, YAML configurations, and JSON schemas. Every skill also includes a Security Hardening section aligned to the OWASP AST10 framework, covering permission manifests, audit trails, tamper detection, execution sandboxing, and data classification. The result is measurably better and demonstrably safer agent output.
+Every skill in this library is a 450-1,200 line operational manual. Not a thin wrapper. Not a checklist. Each one includes reasoning protocols that force step-by-step thinking before action, anti-pattern tables with WRONG/RIGHT code examples showing exactly what fails and why, grounding rules for when the situation is uncertain, and Advanced Capabilities sections with production-grade MCP tool examples, YAML configurations, and JSON schemas. Every skill also includes a Security Hardening section aligned to the OWASP AST10 framework, covering permission manifests, audit trails, tamper detection, execution sandboxing, and data classification. Each skill is built in three layers: reasoning protocols that teach the agent how to approach decisions, advanced capabilities with production integrations, and security hardening that scopes permissions and audits actions during autonomous execution. The result is measurably better and demonstrably safer agent output.
 
 Underneath, 15 production-grade skills power a complete multi-agent orchestration system: DAG-based pipelines that decompose complex tasks into parallel agent workflows, a filesystem-based mesh protocol that prevents agents from overwriting each other's work, a leader election protocol defined in skills and simulated in the dashboard for visualization, shared knowledge graphs with content-hash deduplication that prevent duplicate analysis across agents, and a self-learning engine that records execution metrics and applies confidence-scored optimizations automatically.
 
@@ -173,11 +173,11 @@ When multiple analysis agents scan the same codebase, they independently discove
 
 ## Skills
 
-Cortivex ships 15 Claude Code skills organized into three tiers. Each skill is a self-contained operational manual averaging 600+ lines of structured guidance. Unlike typical skills that provide simple instruction lists, every Cortivex skill includes reasoning protocols (step-by-step decision frameworks), anti-pattern tables (common mistakes with WRONG/RIGHT examples), grounding rules (what to do when the situation is uncertain), and **Advanced Capabilities** sections with MCP tool examples, YAML configurations, and JSON schemas for production-grade integrations.
+Cortivex ships 15 Claude Code skills organized into three tiers. Each skill is a self-contained operational manual averaging 900+ lines of structured guidance, 13,500+ lines total across all skills. Unlike typical skills that provide simple instruction lists, every Cortivex skill includes reasoning protocols (step-by-step decision frameworks), anti-pattern tables (common mistakes with WRONG/RIGHT examples), grounding rules (what to do when the situation is uncertain), and **Advanced Capabilities** sections with MCP tool examples, YAML configurations, and JSON schemas for production-grade integrations.
 
 ### Core Pipeline Skills
 
-These five skills form the foundation. They handle pipeline creation, agent selection, task decomposition, template management, and self-learning.
+These five skills form the foundation. They handle the tasks most developers use daily: pipeline creation, agent selection, task decomposition, template management, and self-learning.
 
 <table>
   <thead>
@@ -212,7 +212,7 @@ These five skills form the foundation. They handle pipeline creation, agent sele
 
 ### Coordination Skills
 
-These five skills handle the distributed systems layer: file coordination, conflict resolution, agent orchestration, leader election, and shared knowledge.
+These five skills run silently in the background so agents don't step on each other. They handle file coordination, conflict resolution, agent orchestration, leader election, and shared knowledge.
 
 <table>
   <thead>
@@ -247,7 +247,7 @@ These five skills handle the distributed systems layer: file coordination, confl
 
 ### Advanced Skills
 
-These five skills address unsolved problems in multi-agent systems that no other skill project covers.
+These five skills solve problems that surface only at scale, addressing unsolved challenges in multi-agent systems that no other skill project covers.
 
 <table>
   <thead>
