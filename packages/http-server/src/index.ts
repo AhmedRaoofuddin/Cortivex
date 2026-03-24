@@ -29,7 +29,8 @@ const ALLOWED_ORIGINS = (process.env.CORTIVEX_ALLOWED_ORIGINS ?? 'http://localho
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g., curl, server-to-server)
+    // Allow requests with no origin (curl, same-origin, server-to-server)
+    // or from explicitly allowed origins
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
@@ -173,7 +174,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   console.error('Unhandled error:', err);
   res.status(500).json({
     error: 'Internal server error',
-    message: err.message,
+    message: 'An unexpected error occurred. Please try again later.',
   });
 });
 

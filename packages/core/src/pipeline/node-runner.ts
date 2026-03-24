@@ -1,7 +1,18 @@
 import { spawn } from 'node:child_process';
+import { platform } from 'node:os';
 import type { NodeDefinition, NodeRunState, NodeType, StreamMessage } from '../types.js';
 import { nodeRegistry } from '../nodes/registry.js';
 import { EventEmitter } from 'eventemitter3';
+
+// On Windows, .cmd scripts cannot be spawned with shell:false.
+// Instead, we spawn cmd.exe /c claude [...args] which works with shell:false.
+const IS_WINDOWS = platform() === 'win32';
+const CLAUDE_CMD = IS_WINDOWS ? (process.env.ComSpec ?? 'cmd.exe') : 'claude';
+
+/** Prepend /c claude to args on Windows so cmd.exe runs the .cmd script */
+function claudeArgs(args: string[]): string[] {
+  return IS_WINDOWS ? ['/c', 'claude', ...args] : args;
+}
 
 export interface NodeRunContext {
   runId: string;
@@ -116,8 +127,8 @@ export class NodeRunner extends EventEmitter<NodeRunnerEvents> {
       // Use stdin to pipe the prompt instead of -p flag.
       // Long prompts with special characters get mangled by Windows shell
       // when passed as command-line args with shell:true.
-      // Use shell:false to prevent command injection
-      const child = spawn('claude', args, {
+      // Use shell:false with cmd.exe /c on Windows to prevent injection
+      const child = spawn(CLAUDE_CMD, claudeArgs(args), {
         cwd: context.targetDir,
         env: { ...process.env },
         shell: false,
@@ -246,11 +257,9 @@ export class NodeRunner extends EventEmitter<NodeRunnerEvents> {
         }
 
         if (code !== 0 && code !== null && !resultText) {
-          reject(
-            new Error(
-              `Claude CLI exited with code ${code} for node "${node.id}".\nOutput: ${fullOutput.slice(0, 500)}`
-            )
-          );
+          // Log detailed error for debugging but return generic message
+          console.error(`Node execution failed - Code: ${code}, Node: ${node.id}, Output: ${fullOutput.slice(0, 500)}`);
+          reject(new Error(`Node execution failed with exit code ${code}`));
           return;
         }
 
@@ -275,12 +284,9 @@ export class NodeRunner extends EventEmitter<NodeRunnerEvents> {
         if (isResolved) return;
         isResolved = true;
         cleanup();
-        reject(
-          new Error(
-            `Failed to spawn Claude CLI for node "${node.id}": ${err.message}. ` +
-            `Ensure Claude CLI is installed and available in PATH.`
-          )
-        );
+        // Log detailed error for debugging but return generic message
+        console.error(`Failed to spawn process for node "${node.id}": ${err.message}`);
+        reject(new Error('Failed to execute node - ensure required tools are installed'));
       });
     });
   }
@@ -298,7 +304,7 @@ export class NodeRunner extends EventEmitter<NodeRunnerEvents> {
       const sanitizedModel = this.sanitizeModel(model);
       const args = ['--print', '--output-format', 'json', '--model', sanitizedModel];
 
-      const child = spawn('claude', args, {
+      const child = spawn(CLAUDE_CMD, claudeArgs(args), {
         cwd: context.targetDir,
         env: { ...process.env },
         shell: false,
@@ -343,11 +349,9 @@ export class NodeRunner extends EventEmitter<NodeRunnerEvents> {
         cleanup();
 
         if (code !== 0 && code !== null) {
-          reject(
-            new Error(
-              `Light node "${node.id}" failed (exit code ${code}): ${stderr.slice(0, 500)}`
-            )
-          );
+          // Log detailed error for debugging but return generic message
+          console.error(`Light node execution failed - Code: ${code}, Node: ${node.id}, Error: ${stderr.slice(0, 500)}`);
+          reject(new Error(`Light node execution failed with exit code ${code}`));
           return;
         }
 
@@ -392,7 +396,9 @@ export class NodeRunner extends EventEmitter<NodeRunnerEvents> {
         if (isResolved) return;
         isResolved = true;
         cleanup();
-        reject(new Error(`Failed to run light node "${node.id}": ${err.message}`));
+        // Log detailed error for debugging but return generic message
+        console.error(`Failed to run light node "${node.id}": ${err.message}`);
+        reject(new Error('Light node execution failed'));
       });
     });
   }
@@ -466,7 +472,9 @@ export class NodeRunner extends EventEmitter<NodeRunnerEvents> {
         if (isResolved) return;
         isResolved = true;
         cleanup();
-        reject(new Error(`Shell node "${node.id}" failed: ${err.message}`));
+        // Log detailed error for debugging but return generic message
+        console.error(`Shell node "${node.id}" failed: ${err.message}`);
+        reject(new Error('Shell node execution failed'));
       });
     });
   }
