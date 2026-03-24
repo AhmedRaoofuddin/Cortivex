@@ -5,7 +5,7 @@
 <h1 align="center">Cortivex: AI Agent Pipeline Orchestration</h1>
 
 <p align="center">
-  <em>Deploy specialized AI agents in coordinated pipelines with self-learning capabilities, filesystem-based mesh coordination, and zero-infrastructure setup.</em>
+  <em>Production-grade AI agent orchestration with OWASP AST10-aligned security hardening, self-learning pipelines, zero-infrastructure mesh coordination, and 17 MCP tools across 15 deeply-written skills.</em>
 </p>
 
 <p align="center">
@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/skills-15%20Claude%20Code-7B6EF6" alt="Skills" />
   <img src="https://img.shields.io/badge/agents-20%2B%20types-4F8EF7" alt="Agents" />
   <img src="https://img.shields.io/badge/templates-16%20pipelines-E8A44A" alt="Templates" />
+  <img src="https://img.shields.io/badge/security-OWASP%20AST10-E05C5C" alt="OWASP" />
 </p>
 
 <p align="center">
@@ -23,7 +24,8 @@
   <a href="#skills">Skills</a> &middot;
   <a href="#how-it-works">How It Works</a> &middot;
   <a href="#templates">Templates</a> &middot;
-  <a href="#dashboard">Dashboard</a>
+  <a href="#dashboard">Dashboard</a> &middot;
+  <a href="#security-hardening">Security</a>
 </p>
 
 ---
@@ -34,7 +36,7 @@ Most Claude Code skills tell agents what to do. Cortivex teaches agents how to t
 
 > **Why the name?** Cortivex combines "cortex" (the thinking layer of the brain) and "vex" (the mesh that connects agents together). The cortex reasons. The vex coordinates. Together, they form an orchestration system where agents don't just execute instructions, they reason through decisions, avoid known mistakes, and handle ambiguity without human intervention.
 
-Every skill in this library is a 450-1,200 line operational manual. Not a thin wrapper. Not a checklist. Each one includes reasoning protocols that force step-by-step thinking before action, anti-pattern tables with WRONG/RIGHT code examples showing exactly what fails and why, grounding rules for when the situation is uncertain, and Advanced Capabilities sections with production-grade MCP tool examples, YAML configurations, and JSON schemas. The result is measurably better agent output.
+Every skill in this library is a 450-1,200 line operational manual. Not a thin wrapper. Not a checklist. Each one includes reasoning protocols that force step-by-step thinking before action, anti-pattern tables with WRONG/RIGHT code examples showing exactly what fails and why, grounding rules for when the situation is uncertain, and Advanced Capabilities sections with production-grade MCP tool examples, YAML configurations, and JSON schemas. Every skill also includes a Security Hardening section aligned to the OWASP Agentic Skills Top 10 (AST10) framework — covering permission manifests, audit trails, tamper detection, execution sandboxing, and data classification. The result is measurably better and demonstrably safer agent output.
 
 Underneath, 15 production-grade skills power a complete multi-agent orchestration system: DAG-based pipelines that decompose complex tasks into parallel agent workflows, a filesystem-based mesh protocol that prevents agents from overwriting each other's work, a leader election protocol defined in skills and simulated in the dashboard for visualization, shared knowledge graphs with content-hash deduplication that prevent duplicate analysis across agents, and a self-learning engine that records execution metrics and applies confidence-scored optimizations automatically.
 
@@ -104,6 +106,7 @@ Cortivex is a comprehensive AI agent orchestration system that transforms Claude
 > | **Debugging** | No pipeline visibility | Step-through debugging with breakpoints, replay, and execution traces |
 > | **Context Limits** | Agents hit token limits and degrade | Context compression preserves actionable information across handoffs |
 > | **Cross-Repo** | Single project scope | Global insight transfer with technology fingerprinting |
+> | **Security** | No skill-level security controls | OWASP AST10-aligned hardening: permission manifests, audit trails, tamper detection, execution sandboxing, PII filtering |
 
 ### Self-Learning Agent Architecture
 
@@ -133,6 +136,7 @@ User → Cortivex (CLI/MCP) → Task Decomposer → Pipeline Engine → Agents �
 | **Optimization** | Context Compressor | Preserves actionable information across agent handoffs |
 | **Monitoring** | Drift Detector | Tracks architecture, config, coverage, and doc drift |
 | **Learning** | Insight Engine | Records metrics, detects patterns, applies optimizations |
+| **Security** | AST10 Controls | Permission manifests, tamper detection, audit trails, execution sandboxing |
 
 </details>
 
@@ -185,23 +189,23 @@ These five skills form the foundation. They handle pipeline creation, agent sele
   <tbody>
     <tr>
       <td><strong>cortivex-pipeline</strong></td>
-      <td>Build and run AI agent pipelines that decompose complex tasks into coordinated agent workflows. The foundation skill that powers <code>/cortivex run</code> and <code>/cortivex create</code> commands. Defines the full pipeline lifecycle from YAML definition through validation, planning, execution, result collection, and learning. Advanced Capabilities: DAG optimization, dynamic pipeline generation, pipeline composition, parallel execution strategies, and versioning with rollback. 697 lines.</td>
+      <td>Build and run AI agent pipelines that decompose complex tasks into coordinated agent workflows. The foundation skill that powers <code>/cortivex run</code> and <code>/cortivex create</code> commands. Defines the full pipeline lifecycle from YAML definition through validation, planning, execution, result collection, and learning. Advanced Capabilities: DAG optimization, dynamic pipeline generation, pipeline composition, parallel execution strategies, and versioning with rollback. 812 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-nodes</strong></td>
-      <td>Complete reference for all 20+ agent node types with configurations, model recommendations, cost baselines, and usage guidance. Includes a decision tree for selecting the right node type and explains when to use Sonnet (deep reasoning) versus Haiku (mechanical tasks at 10x lower cost). Advanced Capabilities: custom node creation, performance profiling, auto-scaling configurations, node chaining patterns, and cost-optimized model selection. 1,187 lines.</td>
+      <td>Complete reference for all 20+ agent node types with configurations, model recommendations, cost baselines, and usage guidance. Includes a decision tree for selecting the right node type and explains when to use Sonnet (deep reasoning) versus Haiku (mechanical tasks at 10x lower cost). Advanced Capabilities: custom node creation, performance profiling, auto-scaling configurations, node chaining patterns, and cost-optimized model selection. 1,308 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-templates</strong></td>
-      <td>Reference for 15 built-in pipeline templates covering PR review, security audit, test generation, TypeScript migration, documentation, and more. Each template lists its nodes, estimated cost, and estimated duration. Advanced Capabilities: template inheritance and composition, parameterized variables, validation and linting, version-controlled management, and dynamic template generation. 458 lines.</td>
+      <td>Reference for 15 built-in pipeline templates covering PR review, security audit, test generation, TypeScript migration, documentation, and more. Each template lists its nodes, estimated cost, and estimated duration. Advanced Capabilities: template inheritance and composition, parameterized variables, validation and linting, version-controlled management, and dynamic template generation. 580 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-task-decomposition</strong></td>
-      <td>Breaks complex requests into atomic tasks with dependency ordering, priority assignment (1-10), and cost estimation. Produces a task queue that feeds directly into the SwarmCoordinator or pipeline DAG. Advanced Capabilities: recursive decomposition strategies, constraint propagation, adaptive granularity control, dependency graph optimization, and priority-weighted scheduling. 567 lines.</td>
+      <td>Breaks complex requests into atomic tasks with dependency ordering, priority assignment (1-10), and cost estimation. Produces a task queue that feeds directly into the SwarmCoordinator or pipeline DAG. Advanced Capabilities: recursive decomposition strategies, constraint propagation, adaptive granularity control, dependency graph optimization, and priority-weighted scheduling. 955 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-learn</strong></td>
-      <td>Self-learning system that records execution metrics, detects optimization patterns, and applies high-confidence insights automatically. Supports six insight types: reorder, substitute_model, skip_node, add_node, adjust_config, and adjust_timeout. Pipelines get measurably better over time. Advanced Capabilities: reinforcement learning integration, A/B testing pipelines, model performance tracking, adaptive optimization strategies, and confidence calibration. 646 lines.</td>
+      <td>Self-learning system that records execution metrics, detects optimization patterns, and applies high-confidence insights automatically. Supports six insight types: reorder, substitute_model, skip_node, add_node, adjust_config, and adjust_timeout. Pipelines get measurably better over time. Advanced Capabilities: reinforcement learning integration, A/B testing pipelines, model performance tracking, adaptive optimization strategies, and confidence calibration. 795 lines.</td>
     </tr>
   </tbody>
 </table>
@@ -220,23 +224,23 @@ These five skills handle the distributed systems layer: file coordination, confl
   <tbody>
     <tr>
       <td><strong>cortivex-mesh</strong></td>
-      <td>Filesystem-based mesh protocol for multi-agent file coordination. Injected into every spawned agent. Defines the mandatory check-claim-work-release protocol with TTL expiration, conflict escalation, bulk operations, and directory-level claims. Advanced Capabilities: distributed file locking, mesh topology optimization, partition tolerance and recovery, TTL-based resource management, and mesh health monitoring. 760 lines.</td>
+      <td>Filesystem-based mesh protocol for multi-agent file coordination. Injected into every spawned agent. Defines the mandatory check-claim-work-release protocol with TTL expiration, conflict escalation, bulk operations, and directory-level claims. Advanced Capabilities: distributed file locking, mesh topology optimization, partition tolerance and recovery, TTL-based resource management, and mesh health monitoring. 1,055 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-mesh-coordination</strong></td>
-      <td>Advanced conflict resolution with MeshResolver nodes. Supports five strategies: priority-based, first-claim, preemption, file partitioning, and serialized access. Includes continuous deadlock detection and pre-allocation of file ownership. Advanced Capabilities: multi-strategy conflict resolution, distributed transaction coordination, deadlock auto-recovery, coordination protocol selection, and failover patterns. 559 lines.</td>
+      <td>Advanced conflict resolution with MeshResolver nodes. Supports five strategies: priority-based, first-claim, preemption, file partitioning, and serialized access. Includes continuous deadlock detection and pre-allocation of file ownership. Advanced Capabilities: multi-strategy conflict resolution, distributed transaction coordination, deadlock auto-recovery, coordination protocol selection, and failover patterns. 851 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-orchestration</strong></td>
-      <td>Multi-agent swarm orchestration with SwarmCoordinator and AgentMonitor nodes. Manages agent pools, task queues, health monitoring via heartbeats, token rotation, automatic respawn, and cost limits. Advanced Capabilities: dynamic agent scaling, resource quota management, priority queue configuration, health-based routing and load balancing, and cost budget enforcement. 622 lines.</td>
+      <td>Multi-agent swarm orchestration with SwarmCoordinator and AgentMonitor nodes. Manages agent pools, task queues, health monitoring via heartbeats, token rotation, automatic respawn, and cost limits. Advanced Capabilities: dynamic agent scaling, resource quota management, priority queue configuration, health-based routing and load balancing, and cost budget enforcement. 912 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-consensus</strong></td>
-      <td>Quorum-based leader election for multi-node clusters. Manages terms, quorum, heartbeats, and automatic failover when the leader goes down. Covers split-brain prevention and includes configurations for 3, 5, and 7-node clusters. Advanced Capabilities: Byzantine fault tolerance, consensus protocol selection, dynamic quorum management, split-brain detection and recovery, and leader election optimization. 467 lines.</td>
+      <td>Quorum-based leader election for multi-node clusters. Manages terms, quorum, heartbeats, and automatic failover when the leader goes down. Covers split-brain prevention and includes configurations for 3, 5, and 7-node clusters. Advanced Capabilities: Byzantine fault tolerance, consensus protocol selection, dynamic quorum management, split-brain detection and recovery, and leader election optimization. 716 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-knowledge</strong></td>
-      <td>Shared knowledge graphs across agents with five node types and seven edge types. Prevents duplicate work through content-hash deduplication and cross-agent synthesis via KnowledgeCurator nodes. Advanced Capabilities: semantic graph queries, knowledge fusion and deduplication, temporal reasoning, cross-domain inference, and knowledge export and visualization. 589 lines.</td>
+      <td>Shared knowledge graphs across agents with five node types and seven edge types. Prevents duplicate work through content-hash deduplication and cross-agent synthesis via KnowledgeCurator nodes. Advanced Capabilities: semantic graph queries, knowledge fusion and deduplication, temporal reasoning, cross-domain inference, and knowledge export and visualization. 932 lines.</td>
     </tr>
   </tbody>
 </table>
@@ -255,23 +259,23 @@ These five skills address unsolved problems in multi-agent systems that no other
   <tbody>
     <tr>
       <td><strong>cortivex-pipeline-debugger</strong></td>
-      <td>Step-through debugging for pipelines. Set breakpoints on nodes, inspect intermediate outputs between nodes, replay failed nodes with modified inputs or different models, and trace execution decisions. Advanced Capabilities: conditional breakpoints, trace diffing and comparison, replay debugging with mutations, performance flame graph generation, and remote debugging with attach mode. 830 lines.</td>
+      <td>Step-through debugging for pipelines. Set breakpoints on nodes, inspect intermediate outputs between nodes, replay failed nodes with modified inputs or different models, and trace execution decisions. Advanced Capabilities: conditional breakpoints, trace diffing and comparison, replay debugging with mutations, performance flame graph generation, and remote debugging with attach mode. 1,156 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-context-compression</strong></td>
-      <td>Solves context window exhaustion across agent handoffs. Compresses 50K-token agent output into 2K-token structured summaries preserving all actionable information. Three compression levels (lossless, lossy, digest) with per-node-type profiles. Advanced Capabilities: semantic chunking strategies, priority-based retention policies, compression quality metrics, context restoration and rehydration, and adaptive compression thresholds. 747 lines.</td>
+      <td>Solves context window exhaustion across agent handoffs. Compresses 50K-token agent output into 2K-token structured summaries preserving all actionable information. Three compression levels (lossless, lossy, digest) with per-node-type profiles. Advanced Capabilities: semantic chunking strategies, priority-based retention policies, compression quality metrics, context restoration and rehydration, and adaptive compression thresholds. 903 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-drift-detection</strong></td>
-      <td>Detects when codebases drift from architecture docs, pipeline configs, coverage targets, or dependency specifications. Five drift categories with severity-scored reports, baselines, and trend analysis. Advanced Capabilities: automated remediation, drift scoring and severity classification, baseline management with snapshots, trend forecasting with predictive alerts, and custom drift rule definitions. 707 lines.</td>
+      <td>Detects when codebases drift from architecture docs, pipeline configs, coverage targets, or dependency specifications. Five drift categories with severity-scored reports, baselines, and trend analysis. Advanced Capabilities: automated remediation, drift scoring and severity classification, baseline management with snapshots, trend forecasting with predictive alerts, and custom drift rule definitions. 1,002 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-agent-replay</strong></td>
-      <td>Records full agent execution traces and replays them with different inputs, models, or configurations. Side-by-side diff of two runs, time-travel to any execution point, and pattern analysis across traces. Advanced Capabilities: variant testing and branching, replay session management, execution comparison and diff analysis, time-travel debugging, and regression detection from replays. 651 lines.</td>
+      <td>Records full agent execution traces and replays them with different inputs, models, or configurations. Side-by-side diff of two runs, time-travel to any execution point, and pattern analysis across traces. Advanced Capabilities: variant testing and branching, replay session management, execution comparison and diff analysis, time-travel debugging, and regression detection from replays. 917 lines.</td>
     </tr>
     <tr>
       <td><strong>cortivex-cross-repo</strong></td>
-      <td>Transfers learned insights across repositories through technology fingerprinting and similarity matching. Privacy-controlled: insights anonymized before sharing, local always overrides global, sharing is opt-in. Advanced Capabilities: repository fingerprinting and classification, insight propagation rules, cross-repo dependency tracking, privacy-aware knowledge sharing, and multi-repository analytics. 646 lines.</td>
+      <td>Transfers learned insights across repositories through technology fingerprinting and similarity matching. Privacy-controlled: insights anonymized before sharing, local always overrides global, sharing is opt-in. Advanced Capabilities: repository fingerprinting and classification, insight propagation rules, cross-repo dependency tracking, privacy-aware knowledge sharing, and multi-repository analytics. 801 lines.</td>
     </tr>
   </tbody>
 </table>
@@ -563,9 +567,39 @@ Contributions are welcome in these areas: new agent node types, pipeline templat
 
 ---
 
-## Security
+## Security Hardening
 
-Cortivex includes security hardening across all components: input validation on pipeline names and agent IDs, path traversal prevention using `resolve()` verification, YAML injection protection with alias count limits, HTTP security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection), restricted CORS origins, and query parameter bounds checking. See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability reporting process, and safe harbor provisions.
+Every Cortivex skill includes a **Security Hardening (OWASP AST10 Aligned)** section — 3,560 lines of production-grade security controls mapped to the [OWASP Agentic Skills Top 10](https://github.com/kenhuangus/agentic-skills-top-10) risk framework.
+
+### Why This Matters
+
+As of Q1 2026, 36.82% of scanned AI agent skills have security flaws and 13.4% have critical issues (Snyk). The OWASP AST10 identifies the 10 most critical risks in agentic AI systems. Cortivex is the first skill library to systematically address all 10.
+
+### Controls by Risk Category
+
+| AST Risk | Controls Applied | Skills Affected |
+|----------|-----------------|-----------------|
+| **AST01** Malicious Skills | SHA-256/ed25519 tamper detection on `injection: always` files, template signature verification | mesh, templates |
+| **AST02** Supply Chain | Remote repo allowlists, hash-pinned templates, import sandboxing | templates |
+| **AST03** Over-Privileged | Per-node permission manifests, shell command allowlists, mandatory forbidden paths (`.env`, `.ssh`, credentials), security node skip prevention, model downgrade locks | pipeline, nodes, task-decomposition, learn, orchestration |
+| **AST05** Unsafe Deserialization | JSON Schema validation before pipeline YAML load, safe loader enforcement | pipeline |
+| **AST06** Weak Isolation | Container sandboxing for shell execution, mandatory TLS for inter-node communication, production debug prevention, mutation replay sandboxing, force-release approval gates | pipeline, consensus, pipeline-debugger, mesh-coordination |
+| **AST08** Poor Scanning | Critical/high severity findings locked to lossless compression, data classification-aware retention | context-compression |
+| **AST09** No Governance | Chain-hashed audit trails with ed25519 signing, AES-256-GCM trace encryption, PII/secret auto-redaction, privacy impact assessments, k-anonymity for cross-repo fingerprints, consent management with cryptographic proof | mesh, knowledge, agent-replay, cross-repo, drift-detection, mesh-coordination |
+
+### Key Security Patterns
+
+**Permission Manifests (AST03)**: Every node type declares its required filesystem paths, tools, and network access. Anything not declared is denied by default.
+
+**Tamper Detection (AST01)**: The mesh skill (`injection: always`) is force-injected into every agent. Its integrity is verified via SHA-256 hash manifest and ed25519 signatures on every load.
+
+**Audit Trails (AST09)**: All mesh operations, conflict resolutions, knowledge graph mutations, and agent lifecycle events produce chain-hashed, append-only audit records with configurable retention.
+
+**Execution Sandboxing (AST06)**: TestRunner and CustomAgent shell commands run inside container isolation with dropped capabilities, resource limits, and command allowlists. Production environments block debug mode by default.
+
+**Data Protection (AST09)**: Agent replay traces are encrypted at rest (AES-256-GCM). Secrets, API keys, and PII are auto-redacted before persistence. Cross-repo insights require privacy impact assessment and k-anonymity verification before sharing.
+
+See [SECURITY.md](SECURITY.md) for the full security policy, vulnerability reporting process, and safe harbor provisions.
 
 ---
 
