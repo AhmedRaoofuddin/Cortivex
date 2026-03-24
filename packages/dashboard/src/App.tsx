@@ -63,6 +63,34 @@ export default function App() {
       // Handle real pipeline execution events from the server
       const d = event.data || {};
 
+      // Initialize activeRun when pipeline starts (handles API-triggered runs)
+      if (event.type === 'pipeline:start' && !store.activeRun) {
+        const pName = (d.pipeline as string) || 'unknown';
+        const runId = (d.runId as string) || `run-${Date.now()}`;
+        // Build nodes from activePipeline if available
+        const pipeline = store.activePipeline;
+        const nodes = pipeline?.nodes || [];
+        const connections = pipeline?.connections || [];
+        useCortivexStore.setState({
+          activeRun: {
+            id: runId,
+            pipelineName: pName,
+            status: 'running',
+            startedAt: new Date().toISOString(),
+            completedAt: null,
+            nodes: nodes.map((n) => ({ ...n, status: 'idle' as NodeStatus, progress: 0 })),
+            connections,
+            totalCost: 0,
+            totalDuration: 0,
+            totalTokens: 0,
+            currentNodeId: null,
+          },
+          activeView: 'execution',
+          terminalOutput: [],
+          activeTerminalTab: null,
+        });
+      }
+
       if (event.type === 'node:start' && store.activeRun) {
         const nodeId = d.nodeId as string;
         if (nodeId) {

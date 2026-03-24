@@ -253,7 +253,7 @@ export class SwarmSimulator {
     const quorumNeeded = Math.floor(aliveAgents.length / 2) + 1;
 
     for (const agent of aliveAgents) {
-      const granted = agent.status === 'running' || agent.status === 'completed' || agent.id === candidate.id;
+      const granted = agent.role !== 'dead' && agent.status !== 'failed';
       if (granted) votesFor++;
 
       broadcast('swarm:vote_cast', {
